@@ -27,6 +27,8 @@ Type a URL into the address bar. The page loads inside a true-to-scale iPhone Du
 - **Tells the site it's an iPhone.** Pages are fetched with an iOS Safari user agent, and `navigator.userAgent`, `platform`, touch support, `screen` size, `devicePixelRatio` and `(pointer: coarse)` all report an iPhone.
 - **Behaves like real Safari.** Pages without a `<meta name="viewport">` are laid out 980 px wide and shrunk to fit, just as on a real iPhone.
 - **Preloads every mode.** The view you're on loads first; the other four load in the background, so unfolding is instant.
+- **Works with modern apps.** Sites are mirrored through the preview's own origin, so Vite/ES-module apps, web fonts and Three.js/WebGL scenes load. Before, these came up blank because the browser blocked their scripts (CORS).
+- **Live visitor badges.** Total visitors (from Vercel Web Analytics) and people online right now, shown as iOS-style glass capsules with a pulsing green dot.
 - **Test report.** One panel shows, per mode: screen size, viewport, and whether the page fits, overflows sideways (by how many px), or isn't mobile-ready.
 
 ## Screenshots
@@ -68,10 +70,10 @@ Screen sizes are in iOS points (CSS px). All displays are @3x.
  browser ──► index.html + app.js          device drawn in CSS from mm geometry,
                 │                          one <iframe> per display mode
                 ▼
-         /api/proxy?url=…  (Vercel function)
+   /m/<mode>/https/<host>/<path>   (Vercel function, routed by site/vercel.json)
                 │  fetch with iPhone Safari UA, follow redirects safely
-                │  strip X-Frame-Options / CSP so the page can be framed
-                │  inject <base> + a shim (UA, touch, screen, DPR, pointer)
+                │  strip X-Frame-Options / CSP, inject <base> + iPhone shim
+                │  serve every asset from /m/_/… so modules, fonts, WebGL are same-origin
                 ▼
          page reports its layout back with postMessage → test report
 ```
@@ -80,6 +82,7 @@ Screen sizes are in iOS points (CSS px). All displays are @3x.
 |---|---|
 | [`site/index.html`](site/index.html), [`site/app.css`](site/app.css) | Page shell, address bar, dock, device styling |
 | [`site/app.js`](site/app.js) | Device geometry (`MODES`), the 3D hinge animation (`buildRig`, `swing`), mode transitions, loading and the test report |
+| [`site/api/stats.js`](site/api/stats.js) | Visitor badges: online presence in Vercel Runtime Cache, total from the Web Analytics API |
 | [`site/api/proxy.js`](site/api/proxy.js) | Proxy plus the injected iPhone shim. Blocks private and internal addresses, follows at most 5 redirects, caps pages at 8 MB, 12 s timeout, rate-limits to 60 requests per minute per IP |
 | [`tools/whiten-frames.js`](tools/whiten-frames.js) | Earlier experiment that painted the screens white in Apple's unfold video (frames are kept out of the repo) |
 | [`vault/`](vault/) | Obsidian vault holding project notes and the session hand-off |
@@ -94,7 +97,9 @@ cd iphone-duo-preview/site
 vercel dev            # serves the page and /api/proxy on http://localhost:3000
 ```
 
-Deploy with `vercel deploy --prod` from `site/`.
+Pushes to `main` deploy production (the Vercel project's Root Directory is `site`). For a manual deploy, run `vercel deploy --prod` from the repo root.
+
+Total visitors needs a Vercel access token in a server-only environment variable: `vercel env add VERCEL_ANALYTICS_TOKEN production`. Without it, the badge shows "—".
 
 If you open `index.html` some other way (an editor preview, `file://`), the page falls back to the deployed proxy automatically.
 
@@ -105,6 +110,7 @@ If you open `index.html` some other way (an editor preview, `file://`), the page
   - pages that call their own APIs from the browser (CORS)
   - some single-page apps that route on `location.pathname`
 - CSS `(pointer: coarse)` media queries inside stylesheets still see a desktop pointer. Only the JavaScript `matchMedia` call is patched.
+- Sites that lock their content to their own app or login (for example Crayon's `client_not_allowed`) can't be previewed.
 - The proxy is public and only rate-limited. Put it behind auth before sharing widely.
 
 ## Credits
