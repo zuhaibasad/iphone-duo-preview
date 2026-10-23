@@ -9,6 +9,7 @@ A temporary website that previews any URL inside a realistic, true-to-scale iPho
 
 ## State
 - Live: https://iphone-duo-preview-eight.vercel.app (Vercel project `iphone-duo-preview`, account `zuhaibasad`).
+- GitHub (public): https://github.com/zuhaibasad/iphone-duo-preview. `reference/` and `media/` (Apple/Anthropic media) are git-ignored and local only; old private repo with media kept as `iphone-duo-preview-old` (delete when ready).
 - Code in `site/`; deploy with `vercel deploy --prod --yes` from `site/`. Frame-whitening script in `tools/whiten-frames.js`.
 - Unfold is a CSS 3D hinge rig (white screens, pixel-exact ends); Apple-video frames archived in `media/`. Website / Native app render switch added, modelled on iOS 27 Duo UI. Specs in [[iPhone-Duo-specs]].
 
