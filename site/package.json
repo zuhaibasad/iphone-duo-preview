@@ -1,0 +1,8 @@
+{
+  "name": "iphone-duo-preview",
+  "private": true,
+  "description": "Static page + Vercel functions; no build step.",
+  "dependencies": {
+    "@vercel/functions": "^3.10.3"
+  }
+}
