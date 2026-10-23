@@ -21,9 +21,15 @@
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </form>
-    <div class="ua-chip" title="Pages are requested with an iOS Safari user agent">
-      <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.5" y="1.5" width="7" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
-      iPhone · Safari
+    <div class="topbar-right">
+      <div class="stat" id="statTotal" title="Total visitors, from Vercel Web Analytics">
+        <svg class="stat-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.6" r="3.6" fill="currentColor"/><path d="M2.2 19.2c0-3.6 3-6.1 6.8-6.1s6.8 2.5 6.8 6.1c0 .6-.5 1-1.1 1H3.3c-.6 0-1.1-.4-1.1-1Z" fill="currentColor"/><circle cx="16.6" cy="8.4" r="3" fill="currentColor" opacity=".55"/><path d="M17.2 13.3c2.8.3 4.8 2.4 4.8 5.2 0 .5-.4.9-.9.9h-3.4c.1-.3.1-.7.1-1 0-2-.9-3.8-2.4-5 .6-.1 1.2-.1 1.8-.1Z" fill="currentColor" opacity=".55"/></svg>
+        <span class="stat-num" id="totalNum">—</span><span class="stat-label">visitors</span>
+      </div>
+      <div class="stat" id="statActive" title="People on this page right now">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span class="stat-num" id="activeNum">1</span><span class="stat-label">online</span>
+      </div>
     </div>
   </header>
 

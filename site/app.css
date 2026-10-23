@@ -281,3 +281,32 @@ body:not(.render-app) .app-only { display: none !important; }
 .rig-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; transform-style: preserve-3d; }
 .rig-face.back { transform: rotateY(180deg); }
 .rig-shade { position: absolute; background: #000; opacity: 0; pointer-events: none; }
+
+/* ---------- visitor badges (iOS 26 "Liquid Glass" capsules) ---------- */
+.topbar-right { justify-self: end; display: flex; align-items: center; gap: 8px; }
+.stat {
+  display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px 0 11px;
+  border-radius: 999px; white-space: nowrap; font-variant-numeric: tabular-nums;
+  background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.58));
+  backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: .5px solid rgba(29, 28, 26, .08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(29,28,26,.03),
+              0 1px 2px rgba(29,28,26,.05), 0 10px 24px -14px rgba(29,28,26,.28);
+}
+.stat-icon { width: 17px; height: 17px; color: var(--ink); }
+.stat-num { font-size: 13.5px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); transition: transform .25s, opacity .25s; }
+.stat-num.bump { transform: translateY(-2px); opacity: .55; }
+.stat-label { font-size: 12.5px; color: var(--ink-2); }
+.live-dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: #30d158; /* iOS systemGreen */
+  box-shadow: 0 0 0 2px rgba(48, 209, 88, .18); }
+.live-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: #30d158;
+  animation: live-pulse 2s cubic-bezier(.2,.6,.3,1) infinite; }
+@keyframes live-pulse { from { transform: scale(1); opacity: .7; } to { transform: scale(3.2); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .live-dot::after { animation: none; } }
+@media (max-width: 760px) {
+  .topbar { grid-template-columns: 1fr auto; }
+  .urlbar { grid-column: 1 / -1; order: 2; }
+  .topbar-right { grid-column: 2; order: 1; }
+  .stat { height: 30px; padding: 0 10px; }
+  .stat-label { display: none; }
+}

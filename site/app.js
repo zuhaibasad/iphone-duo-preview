@@ -486,12 +486,16 @@
 
   // The proxy is a Vercel function. When the page is opened some other way (an editor's
   // preview server, a file:// URL) there is no /api/proxy, so use the deployed one.
-  const DEPLOYED_PROXY = 'https://iphone-duo-preview-eight.vercel.app/api/proxy';
-  let PROXY = '/api/proxy';
-  const proxyReady = fetch('/api/proxy?url=')
-    .then((r) => r.text())
-    .then((t) => { if (!t.includes("Safari can't open")) PROXY = DEPLOYED_PROXY; })
-    .catch(() => { PROXY = DEPLOYED_PROXY; });
+  // Pages are mirrored at /m/<mode>/<scheme>/<host>/<path> (see api/proxy.js).
+  const DEPLOYED_ORIGIN = 'https://iphone-duo-preview-eight.vercel.app';
+  let PROXY_ORIGIN = '';
+  const proxyReady = fetch('/api/proxy?__probe=1')
+    .then((r) => { if (r.headers.get('X-Duo-Proxy') !== '1') PROXY_ORIGIN = DEPLOYED_ORIGIN; })
+    .catch(() => { PROXY_ORIGIN = DEPLOYED_ORIGIN; });
+  const mirrorUrl = (url, mode) => {
+    const u = new URL(url);
+    return `${PROXY_ORIGIN}/m/${mode}/${u.protocol.slice(0, -1)}/${u.host}${u.pathname}${u.search}`;
+  };
 
   function setRender(render) {
     state.render = render;
@@ -533,7 +537,7 @@
         if (state.url !== url) return;
         f.status = 'loading';
         f.root.classList.add('loading');
-        f.iframe.src = `${PROXY}?url=${encodeURIComponent(url)}&__duo=${mode}`;
+        f.iframe.src = mirrorUrl(url, mode);
         renderReport();
       }, i === 0 ? 0 : 500 + i * 250);
     });
@@ -651,5 +655,50 @@
 
   const q = new URLSearchParams(location.search).get('url');
   if (q && normalise(q)) loadSite(normalise(q));
+  // ---------- visitor badges ----------
+  const HEARTBEAT_MS = 25000;
+  const visitorId = (() => {
+    const fresh = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    try {
+      let id = localStorage.getItem('duo-visitor');
+      if (!id) { id = fresh(); localStorage.setItem('duo-visitor', id); }
+      return id;
+    } catch { return fresh(); }
+  })();
+  const fmt = new Intl.NumberFormat();
+  function setStat(el, value) {
+    const text = value == null ? '—' : fmt.format(value);
+    if (el.textContent === text) return;
+    el.classList.add('bump');
+    setTimeout(() => { el.textContent = text; el.classList.remove('bump'); }, 140);
+  }
+  async function heartbeat(leave = false) {
+    await proxyReady;
+    const url = `${PROXY_ORIGIN}/api/stats`;
+    const body = JSON.stringify({ id: visitorId, leave });
+    if (leave) { navigator.sendBeacon?.(url, new Blob([body], { type: 'text/plain' })); return; }
+    try {
+      const r = await fetch(url, { method: 'POST', body, headers: { 'Content-Type': 'text/plain' } });
+      const s = await r.json();
+      setStat($('#activeNum'), Math.max(1, s.active));
+      setStat($('#totalNum'), s.total);
+      $('#statTotal').title = s.total == null ? 'Total visitors appear once Vercel Web Analytics is connected' : 'Total visitors, from Vercel Web Analytics';
+    } catch { /* badges keep their last values */ }
+  }
+  let beat = null;
+  function startBeating() {
+    if (beat) return;
+    heartbeat();
+    beat = setInterval(heartbeat, HEARTBEAT_MS);
+  }
+  function stopBeating() {
+    clearInterval(beat);
+    beat = null;
+    heartbeat(true);
+  }
+  document.addEventListener('visibilitychange', () => (document.visibilityState === 'visible' ? startBeating() : stopBeating()));
+  window.addEventListener('pagehide', stopBeating);
+  if (document.visibilityState === 'visible') startBeating();
+
   window.duo = { goTo, loadSite, state, frames }; // handy for testing from the console
 })();

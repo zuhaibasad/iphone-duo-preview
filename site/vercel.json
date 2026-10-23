@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/m/:duoSeg/:duoScheme/:duoHost", "destination": "/api/proxy?__m=:duoSeg&__s=:duoScheme&__h=:duoHost&__p=" },
+    { "source": "/m/:duoSeg/:duoScheme/:duoHost/", "destination": "/api/proxy?__m=:duoSeg&__s=:duoScheme&__h=:duoHost&__p=" },
+    { "source": "/m/:duoSeg/:duoScheme/:duoHost/:duoPath*", "destination": "/api/proxy?__m=:duoSeg&__s=:duoScheme&__h=:duoHost&__p=:duoPath*" },
+    { "source": "/:duoFb*", "destination": "/api/proxy?__fb=:duoFb*" }
+  ]
+}
