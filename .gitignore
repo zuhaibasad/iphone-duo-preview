@@ -1,0 +1,15 @@
+# Vercel link + OIDC token written by `vercel link`
+.vercel
+.env*
+
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Obsidian per-machine UI state
+vault/.obsidian/workspace*.json
+vault/.obsidian/cache
+
+# Reference media (Apple / Anthropic imagery and video) and frames derived from it: local only
+reference/
+media/
